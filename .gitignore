@@ -1,0 +1,99 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+
+# Editor and IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Emacs
+\#*\#
+.\#*
+
+# Claude Code local testing
+.claude-code-test/
+test-sessions/
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+
+# Cache
+.cache/
+*.cache
+
+# Environment files (if any scripts use them)
+.env
+.env.local
+.env.*.local
+
+# Package manager artifacts (if any)
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Python (if any testing scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+.venv/
+
+# Build artifacts (if any)
+dist/
+build/
+*.egg-info/
+
+# Personal notes/scratch files
+NOTES.md
+TODO.md
+scratch/
+.scratch/
+
+# Git merge artifacts
+*.orig
+*.BACKUP.*
+*.BASE.*
+*.LOCAL.*
+*.REMOTE.*
+*_BACKUP_*
+*_BASE_*
+*_LOCAL_*
+*_REMOTE_*
