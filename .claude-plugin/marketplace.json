@@ -1,0 +1,37 @@
+{
+  "name": "smartwatermelon-marketplace",
+  "owner": {
+    "name": "Andrew Rich",
+    "email": "andrew@smartwatermelon.dev"
+  },
+  "metadata": {
+    "description": "Quality-focused plugins for Claude Code: Critical code review, testing tools, and development workflows",
+    "version": "1.0.0",
+    "homepage": "https://github.com/smartwatermelon/smartwatermelon-marketplace",
+    "repository": "https://github.com/smartwatermelon/smartwatermelon-marketplace"
+  },
+  "plugins": [
+    {
+      "name": "code-critic",
+      "source": "./plugins/code-critic",
+      "description": "Skeptical code review agent that assumes code is wrong until proven otherwise. Challenges architectural decisions, identifies failure modes, and prioritizes long-term maintainability over validation.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Andrew Rich",
+        "url": "https://github.com/smartwatermelon"
+      },
+      "license": "MIT",
+      "keywords": [
+        "code-review",
+        "adversarial-review",
+        "critical-feedback",
+        "code-quality",
+        "maintainability",
+        "git-hooks",
+        "security"
+      ],
+      "category": "quality",
+      "strict": false
+    }
+  ]
+}

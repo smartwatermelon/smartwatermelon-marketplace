@@ -1,0 +1,13 @@
+{
+  "name": "code-critic",
+  "description": "Skeptical code review agent that assumes code is wrong until proven otherwise. Challenges architectural decisions, identifies failure modes, and prioritizes long-term maintainability over validation.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Andrew Rich",
+    "email": "andrew@smartwatermelon.dev"
+  },
+  "homepage": "https://github.com/smartwatermelon/code-critic-plugin",
+  "repository": "https://github.com/smartwatermelon/code-critic-plugin",
+  "license": "MIT",
+  "keywords": ["code-review", "adversarial-review", "critical-feedback", "code-quality", "maintainability", "git-hooks"]
+}
