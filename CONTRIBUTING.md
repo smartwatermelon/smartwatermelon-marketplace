@@ -213,7 +213,7 @@ All contributions will be reviewed for:
 - **Questions**: Open a GitHub Discussion
 - **Issues**: Open a GitHub Issue
 - **Ideas**: Open a GitHub Discussion with "Idea" label
-- **Urgent**: Email andrew@smartwatermelon.dev
+- **Urgent**: Email andrew.rich@gmail.com
 
 ## Testing Your Plugin
 
@@ -257,7 +257,7 @@ All contributors will be listed in:
 
 ## Questions?
 
-Feel free to open a Discussion or reach out at andrew@smartwatermelon.dev
+Feel free to open a Discussion or reach out at andrew.rich@gmail.com
 
 ---
 

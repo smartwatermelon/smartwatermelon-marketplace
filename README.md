@@ -131,7 +131,7 @@ Unlike general-purpose marketplaces, SmartWatermelon focuses on:
 
 - **Issues**: [GitHub Issues](https://github.com/smartwatermelon/smartwatermelon-marketplace/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/smartwatermelon/smartwatermelon-marketplace/discussions)
-- **Contact**: andrew@smartwatermelon.dev
+- **Contact**: andrew.rich@gmail.com
 
 ## License
 
