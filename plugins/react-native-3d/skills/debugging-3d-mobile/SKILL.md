@@ -424,9 +424,9 @@ function DebugPanel() {
   const { gl, scene, camera } = useThree();
   const [stats, setStats] = useState({});
 
-  useFrame(() => {
+  useFrame((state, delta) => {
     setStats({
-      fps: Math.round(1000 / gl.info.render.frame),
+      fps: Math.round(1 / delta),
       drawCalls: gl.info.render.calls,
       triangles: gl.info.render.triangles,
       geometries: gl.info.memory.geometries,

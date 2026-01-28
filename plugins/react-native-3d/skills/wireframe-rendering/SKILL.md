@@ -126,7 +126,7 @@ function Rod({
     const euler = new THREE.Euler().setFromQuaternion(quaternion);
 
     return { position, rotation: euler, length };
-  }, [start, end]);
+  }, [start.x, start.y, start.z, end.x, end.y, end.z]);
 
   return (
     <mesh
@@ -166,10 +166,11 @@ function StraightCable({
   color?: string;
   thickness?: number;
 }) {
+  // Use primitive values as dependencies - Vector3 reference may not change
   const path = useMemo(() => {
     const curve = new THREE.LineCurve3(start, end);
     return curve;
-  }, [start, end]);
+  }, [start.x, start.y, start.z, end.x, end.y, end.z]);
 
   return (
     <mesh>
@@ -189,7 +190,8 @@ function CatenaryCable({
   sag = 0.5,
   segments = 20,
   color = '#4a90d9',
-  thickness = 0.02
+  thickness = 0.02,
+  onSelect
 }: {
   start: THREE.Vector3;
   end: THREE.Vector3;
@@ -197,6 +199,7 @@ function CatenaryCable({
   segments?: number;
   color?: string;
   thickness?: number;
+  onSelect?: () => void;
 }) {
   const path = useMemo(() => {
     const points: THREE.Vector3[] = [];
@@ -215,10 +218,15 @@ function CatenaryCable({
     }
 
     return new THREE.CatmullRomCurve3(points);
-  }, [start, end, sag, segments]);
+  }, [start.x, start.y, start.z, end.x, end.y, end.z, sag, segments]);
 
   return (
-    <mesh>
+    <mesh
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        onSelect?.();
+      }}
+    >
       <tubeGeometry args={[path, segments, thickness, 8, false]} />
       <meshStandardMaterial color={color} />
     </mesh>

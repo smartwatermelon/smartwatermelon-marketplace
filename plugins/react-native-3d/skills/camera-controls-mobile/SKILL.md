@@ -401,13 +401,18 @@ const panGesture = Gesture.Pan()
 
 ### Issue: Zoom feels wrong (too fast/slow)
 
-**Solution**: Use logarithmic zoom
+**Solution**: Use logarithmic zoom with saved base value
 
 ```tsx
+const savedRadius = useSharedValue(10);
+
 const zoomGesture = Gesture.Pinch()
+  .onStart(() => {
+    savedRadius.value = radius.value;
+  })
   .onUpdate((e) => {
     // Logarithmic zoom feels more natural
-    radius.value = baseRadius.value * Math.pow(e.scale, -1);
+    radius.value = savedRadius.value * Math.pow(e.scale, -1);
   });
 ```
 
