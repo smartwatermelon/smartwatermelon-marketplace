@@ -57,16 +57,7 @@
         "tensegrity"
       ],
       "category": "mobile",
-      "strict": false,
-      "agents": ["./agents/react-native-3d.md"],
-      "skills": [
-        "./skills/r3f-native-patterns",
-        "./skills/touch-gesture-3d",
-        "./skills/wireframe-rendering",
-        "./skills/camera-controls-mobile",
-        "./skills/skia-3d-alternative",
-        "./skills/debugging-3d-mobile"
-      ]
+      "strict": false
     }
   ]
 }
