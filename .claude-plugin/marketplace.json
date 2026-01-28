@@ -32,6 +32,41 @@
       ],
       "category": "quality",
       "strict": false
+    },
+    {
+      "name": "react-native-3d",
+      "source": "./plugins/react-native-3d",
+      "description": "Expert agent for React Native 3D development with React Three Fiber, expo-gl, Three.js, and Skia. Covers wireframe rendering, touch/gesture handling, camera controls, and mobile performance optimization.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Andrew Rich",
+        "url": "https://github.com/smartwatermelon"
+      },
+      "license": "MIT",
+      "keywords": [
+        "react-native",
+        "3d",
+        "three.js",
+        "react-three-fiber",
+        "r3f",
+        "expo-gl",
+        "skia",
+        "mobile",
+        "game-development",
+        "wireframe",
+        "tensegrity"
+      ],
+      "category": "mobile",
+      "strict": false,
+      "agents": ["./agents/react-native-3d.md"],
+      "skills": [
+        "./skills/r3f-native-patterns",
+        "./skills/touch-gesture-3d",
+        "./skills/wireframe-rendering",
+        "./skills/camera-controls-mobile",
+        "./skills/skia-3d-alternative",
+        "./skills/debugging-3d-mobile"
+      ]
     }
   ]
 }
