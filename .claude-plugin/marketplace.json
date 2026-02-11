@@ -15,7 +15,7 @@
       "name": "code-critic",
       "source": "./plugins/code-critic",
       "description": "Skeptical code review agent that assumes code is wrong until proven otherwise. Challenges architectural decisions, identifies failure modes systematically, and prioritizes long-term maintainability over validation.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "Andrew Rich",
         "url": "https://github.com/smartwatermelon"

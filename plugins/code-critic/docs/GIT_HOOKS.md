@@ -6,8 +6,8 @@ This guide explains how to integrate the Code Critic adversarial-reviewer agent 
 
 - [Overview](#overview)
 - [Recommended Hooks](#recommended-hooks)
-- [Pre-Commit Hook](#pre-commit-hook)
-- [Pre-Push Hook](#pre-push-hook)
+- [Pre-Commit Hook](#pre-commit-hook-strict-projects)
+- [Pre-Push Hook](#pre-push-hook-recommended)
 - [Commit-Msg Hook](#commit-msg-hook)
 - [Advanced Patterns](#advanced-patterns)
 - [Troubleshooting](#troubleshooting)
@@ -88,7 +88,7 @@ REVIEW_EXIT=$?
 
 if [ $REVIEW_EXIT -ne 0 ]; then
   echo "${RED}❌ Code Critic found issues${NC}"
-  echo "Fix issues and try again, or push with --no-verify to skip review"
+  echo "Fix issues and try again. If review times out, retry or split into smaller commits."
   exit 1
 fi
 
@@ -97,6 +97,7 @@ exit 0
 ```
 
 Make it executable:
+
 ```bash
 chmod +x .git/hooks/pre-push
 ```
@@ -130,7 +131,7 @@ echo "$DIFF" | claude --agent adversarial-reviewer \
   -p "Quick review of staged changes. Focus on critical issues only."
 
 if [ $? -ne 0 ]; then
-  echo "❌ Review found issues. Fix and retry, or commit with --no-verify"
+  echo "❌ Review found issues. Fix and retry, or split into smaller commits."
   exit 1
 fi
 
@@ -139,6 +140,7 @@ exit 0
 ```
 
 Make it executable:
+
 ```bash
 chmod +x .git/hooks/pre-commit
 ```
@@ -223,7 +225,7 @@ if git diff --cached --name-only | grep -qE '(auth|security|payment|schema|model
     echo "  - Architecture changes"
     echo "  - Safety considerations"
     echo ""
-    echo "Add a note to your commit message, or commit with --no-verify"
+    echo "Add a note about security considerations to your commit message."
     exit 1
   fi
 fi
@@ -232,6 +234,7 @@ exit 0
 ```
 
 Make it executable:
+
 ```bash
 chmod +x .git/hooks/commit-msg
 ```
@@ -243,11 +246,13 @@ chmod +x .git/hooks/commit-msg
 Share hooks across all repositories:
 
 1. Create global hooks directory:
+
    ```bash
    mkdir -p ~/.git-hooks
    ```
 
 2. Configure git to use it:
+
    ```bash
    git config --global core.hooksPath ~/.git-hooks
    ```
@@ -356,6 +361,7 @@ fi
 ```
 
 Usage:
+
 ```bash
 # Skip for this commit
 git commit -m "docs: update README [skip-critic]"
@@ -423,12 +429,14 @@ jobs:
 ### Hook Not Running
 
 Check if hook is executable:
+
 ```bash
 ls -l .git/hooks/pre-push
 # Should show: -rwxr-xr-x
 ```
 
 Make it executable:
+
 ```bash
 chmod +x .git/hooks/pre-push
 ```
@@ -436,11 +444,13 @@ chmod +x .git/hooks/pre-push
 ### Hook Runs But Agent Not Found
 
 Verify plugin installation:
+
 ```bash
 claude plugin list | grep code-critic
 ```
 
 Install if missing:
+
 ```bash
 claude plugin install github:smartwatermelon/code-critic-plugin
 ```
@@ -464,17 +474,16 @@ git diff origin/main...HEAD | claude --agent adversarial-reviewer \
 - Focus on security and maintainability only"
 ```
 
-### Skipping Hooks in Emergencies
+### When Hooks Block You
 
-```bash
-# Skip pre-commit
-git commit --no-verify
+If the review hook times out or fails unexpectedly:
 
-# Skip pre-push
-git push --no-verify
-```
+1. **Retry the commit** — transient failures happen
+2. **Increase timeout**: `git config review.timeout 300`
+3. **Split into smaller commits** — smaller diffs review faster
+4. **Check agent availability** — verify the plugin is installed
 
-**Use sparingly!** These safety nets exist for a reason.
+Do not use `--no-verify` to skip review hooks. The review exists to catch issues before they reach CI (which costs money). If you truly cannot proceed, have a human commit manually.
 
 ## Best Practices
 

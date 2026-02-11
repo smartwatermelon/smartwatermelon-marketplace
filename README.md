@@ -5,6 +5,7 @@ A curated collection of quality-focused plugins for Claude Code, emphasizing cri
 ## Philosophy
 
 This marketplace focuses on plugins that:
+
 - **Challenge assumptions** rather than validate them
 - **Identify failure modes** before they reach production
 - **Prioritize long-term maintainability** over short-term convenience
@@ -32,18 +33,20 @@ claude plugin install --all smartwatermelon-marketplace
 
 ### Code Critic
 
-**Status**: Stable v1.0.0
+**Status**: Stable v1.2.0
 **Category**: Quality / Code Review
 
 Skeptical code review agent that assumes code is wrong until proven otherwise. Unlike validation-focused reviewers, Code Critic challenges architectural decisions, identifies failure modes, and prioritizes long-term maintainability.
 
 **Features**:
+
 - Reviews code hierarchy: Purpose → Architecture → Failure Modes → Maintenance → Implementation
 - Challenges assumptions and asks "why" before "how"
 - Identifies race conditions, error handling gaps, and scalability issues
 - Integrates with git hooks for automated review
 
 **When to use**:
+
 - Security-critical code (auth, payments, data handling)
 - Architectural changes
 - Complex business logic
@@ -52,6 +55,7 @@ Skeptical code review agent that assumes code is wrong until proven otherwise. U
 **Documentation**: [plugins/code-critic/README.md](plugins/code-critic/README.md)
 
 **Install**:
+
 ```bash
 claude plugin install code-critic@smartwatermelon-marketplace
 ```
@@ -97,6 +101,7 @@ plugins/
 ### Quality Standards
 
 Plugins in this marketplace must:
+
 - Have comprehensive documentation
 - Include usage examples
 - Specify clear use cases (when to use, when not to use)
@@ -109,12 +114,14 @@ Plugins in this marketplace must:
 ### Why "SmartWatermelon"?
 
 SmartWatermelon represents the intersection of:
+
 - **Smart**: Intelligent, thoughtful tooling that enhances developer capabilities
 - **Watermelon**: Fresh perspective, cutting through to the core of problems
 
 ### Quality Over Quantity
 
 This marketplace emphasizes quality over quantity. Each plugin is:
+
 - **Purpose-driven**: Solves a specific, real problem
 - **Well-documented**: Clear usage guide with examples
 - **Battle-tested**: Used in real projects
@@ -123,6 +130,7 @@ This marketplace emphasizes quality over quantity. Each plugin is:
 ### Not Just Another Marketplace
 
 Unlike general-purpose marketplaces, SmartWatermelon focuses on:
+
 1. **Critical thinking tools** - Plugins that challenge and improve your thinking
 2. **Quality assurance** - Tools that catch problems before they ship
 3. **Developer discipline** - Workflows that enforce best practices
@@ -131,7 +139,7 @@ Unlike general-purpose marketplaces, SmartWatermelon focuses on:
 
 - **Issues**: [GitHub Issues](https://github.com/smartwatermelon/smartwatermelon-marketplace/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/smartwatermelon/smartwatermelon-marketplace/discussions)
-- **Contact**: andrew.rich@gmail.com
+- **Contact**: <andrew.rich@gmail.com>
 
 ## License
 
@@ -147,5 +155,5 @@ Inspired by the philosophy that good tools challenge us to be better developers.
 
 ---
 
-**Latest Version**: 1.0.0
-**Last Updated**: 2026-01-15
+**Latest Version**: 1.2.0
+**Last Updated**: 2026-02-11

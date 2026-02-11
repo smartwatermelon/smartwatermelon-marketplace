@@ -24,12 +24,13 @@ Claude: Let me review this implementation using the adversarial-reviewer agent
 ```
 
 The agent will:
+
 1. Analyze your code from a skeptical perspective
 2. Check the data model for invalid-state representation
 3. Challenge architectural decisions
 4. Systematically check for failure modes (concurrency, resource leaks, distributed systems, security, data integrity)
 5. Question maintenance burden
-6. Provide specific, actionable feedback with a clear verdict (Block, Revise, or Accept)
+6. Provide specific, actionable feedback with a clear verdict (Block, Revise, Accept, or Insufficient Context)
 
 ### Agent Naming
 
@@ -50,31 +51,38 @@ Claude: Let me use the adversarial-reviewer agent to thoroughly review this secu
 [Invokes Task tool]
 
 Agent Response:
-"JWT refresh implementation review:
+"### Summary
+JWT refresh implementation that auto-refreshes 5 minutes before
+expiration. Primary concern: race conditions on concurrent refresh
+and non-atomic token rotation will cause user lockouts.
 
-PURPOSE:
-- Why auto-refresh 5 minutes before expiration? That's arbitrary. Have you measured your 95th percentile request duration? If requests can take 30 seconds, this window is too tight.
-- What problem does refresh solve vs. making the access token longer-lived? Refresh tokens introduce state and complexity.
+### Critical Issues
+- **Non-atomic token rotation**: If the database write succeeds but
+  the response fails, the old refresh token is invalidated and the
+  client never receives the new one. User is locked out with no
+  recovery path.
+- **Concurrent refresh race condition**: Multiple browser tabs can
+  trigger refresh simultaneously. Without a per-user mutex, both
+  tabs invalidate each other's tokens. This is a guaranteed
+  production issue for any user with multiple tabs.
 
-ARCHITECTURE:
-- Storing refresh token in HTTP-only cookie: Good. But where's the CSRF protection? Cookie alone isn't enough.
-- Token refresh happens client-side. What happens when multiple tabs try to refresh simultaneously? Race condition.
+### Concerns
+- No exponential backoff on refresh failures. During an auth service
+  outage, every client retries immediately — retry storm.
+- The 5-minute refresh window is arbitrary. If your 95th percentile
+  request duration approaches 5 minutes, users will see auth
+  failures during long operations.
 
-FAILURE MODES:
-- Refresh token rotation not atomic. If the database write succeeds but the response fails, user is locked out. Where's the rollback?
-- No exponential backoff on refresh failures. Client will hammer your refresh endpoint during outages.
-- What happens if refresh takes longer than the access token's remaining lifetime? User sees auth failures.
+### Questions
+- Why auto-refresh instead of longer-lived access tokens? The refresh
+  token introduces state management complexity. What's the threat
+  model that justifies it?
+- Where's the CSRF protection? HTTP-only cookie alone isn't enough.
 
-RECOMMENDATIONS:
-1. Add mutex/lock for per-user refresh operations
-2. Implement sliding refresh window instead of hard cutoff
-3. Add circuit breaker for refresh endpoint
-4. Store refresh attempt count to detect compromise
-5. Add integration test for concurrent refresh attempts
-
-VERDICT: Block. The race condition on concurrent refresh and the non-atomic
-token rotation will cause user lockouts in production. Fix those two before
-merging."
+### Verdict
+**Block.** The race condition on concurrent refresh and the
+non-atomic token rotation will cause user lockouts in production.
+Fix those two before merging."
 ```
 
 ### Example 2: Reviewing an API Design
@@ -85,34 +93,39 @@ User: I've designed this new API endpoint for file uploads
 Claude: [Uses adversarial-reviewer agent]
 
 Agent Response:
-"API design review:
+"### Summary
+File upload API that proxies through the API server to S3. Primary
+concern: the architecture is fundamentally wrong — proxying uploads
+through your server adds cost, latency, and failure modes that
+presigned URLs would eliminate.
 
-PURPOSE:
-- You're accepting arbitrary file sizes. Have you considered the cost implications? A 5GB upload to S3 costs you money even if it fails validation.
-- Why synchronous upload? This blocks your API workers. Should be async with job queue.
+### Critical Issues
+- **No virus scanning**: Every file upload endpoint needs malware
+  detection. Accepting arbitrary files from users without scanning
+  is a security gap. ClamAV or AWS GuardDuty before the file
+  reaches your storage layer.
 
-ARCHITECTURE:
-- File goes through your API server to S3. Why? This adds latency and costs. Client should upload directly to S3 with presigned URLs.
-- No mention of virus scanning. Every file upload endpoint needs malware detection.
+### Concerns
+- File proxied through API server to S3 adds latency and cost.
+  Clients should upload directly via S3 presigned URLs.
+- No resume capability. A 90%-complete upload that fails means the
+  user starts over. Consider the tus protocol for resumable uploads.
+- File metadata stored separately from files in S3. These will
+  drift. S3 object tags would keep them co-located.
+- No per-user upload rate limiting. A single user can consume all
+  your upload bandwidth.
 
-FAILURE MODES:
-- Upload fails at 90%—where's the resume capability? User starts over?
-- Multiple concurrent uploads from same user—where's the rate limiting?
-- File metadata stored separate from file in S3. These will get out of sync. How do you reconcile?
+### Questions
+- Why synchronous upload? This blocks API workers. What's the
+  expected file size distribution? Anything over 10MB should be
+  async with a job queue.
+- Why accept arbitrary file sizes? A 5GB upload costs you money
+  even if it fails validation. What's the max you actually need?
 
-IMPLEMENTATION:
-- Multipart upload chunks are 5MB. Fine for most files, but configurable? 100MB file = 20 requests = 20 chances to fail.
-
-RECOMMENDATIONS:
-1. Use S3 presigned URLs for direct uploads
-2. Implement resumable uploads (tus protocol or similar)
-3. Add virus scanning (ClamAV or AWS GuardDuty)
-4. Store all metadata as S3 object tags for consistency
-5. Add per-user upload rate limiting
-6. Consider S3 Transfer Acceleration for global users
-
-VERDICT: Revise. The direct-to-S3 upload is an architecture change, not a
-tweak — rework the upload path, add virus scanning, and I'd approve."
+### Verdict
+**Revise.** The direct-to-S3 upload is an architecture change, not
+a tweak — rework the upload path, add virus scanning, and I'd
+approve."
 ```
 
 ## CLI Usage
@@ -310,21 +323,9 @@ concern?
 
 ## Interpreting Feedback
 
-### Severity Calibration
+### Severity and Verdict
 
-The agent applies these standards consistently:
-
-- **Critical** (blocks merge): The code will break in production under realistic conditions. Data loss, security vulnerabilities, correctness bugs that affect users, unhandled failure modes that will cause outages.
-- **Concern** (should fix, doesn't block): Technical debt that will compound. Missing observability. Coupling that will make the next change painful. Performance issues that don't matter now but will at 10x scale.
-- **Question** (needs justification): Design decisions that seem undermotivated. Trade-offs that weren't explained. Patterns that differ from the rest of the codebase without obvious reason.
-
-### Verdict
-
-Every review ends with a clear disposition:
-
-- **Block**: "Do not merge this. [These issues] must be addressed first."
-- **Revise**: "This needs changes before merging: [specific list]. I'd approve once those are addressed."
-- **Accept**: "This is solid. [Brief explanation of why.] Ship it."
+The agent uses three severity levels (Critical, Concern, Question) and four verdicts (Block, Revise, Accept, Insufficient Context). See the [agent prompt](../agents/adversarial-reviewer.md) for full definitions — it is the source of truth for these standards.
 
 ### When to Push Back
 
