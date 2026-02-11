@@ -73,7 +73,8 @@ if [ -z "$DIFF" ]; then
   exit 0
 fi
 
-# Run review
+# Run review (temporarily allow non-zero exit to capture result)
+set +e
 echo "$DIFF" | claude --agent adversarial-reviewer \
   --no-session-persistence \
   -p "Review these changes before push. Focus on:
@@ -83,8 +84,8 @@ echo "$DIFF" | claude --agent adversarial-reviewer \
 - Maintenance burden
 
 Provide specific, actionable feedback."
-
 REVIEW_EXIT=$?
+set -e
 
 if [ $REVIEW_EXIT -ne 0 ]; then
   echo "${RED}❌ Code Critic found issues${NC}"
@@ -182,6 +183,8 @@ fi
 echo "🔒 Security-critical files detected, running adversarial review..."
 echo "$CRITICAL_FILES"
 
+# Run review (temporarily allow non-zero exit to capture result)
+set +e
 git diff origin/main...HEAD | claude --agent adversarial-reviewer \
   --no-session-persistence \
   -p "Review these security-critical changes:
@@ -195,8 +198,10 @@ Focus on:
 - XSS vulnerabilities
 - Race conditions
 - Data exposure"
+REVIEW_EXIT=$?
+set -e
 
-if [ $? -ne 0 ]; then
+if [ $REVIEW_EXIT -ne 0 ]; then
   echo "❌ Security review failed"
   exit 1
 fi

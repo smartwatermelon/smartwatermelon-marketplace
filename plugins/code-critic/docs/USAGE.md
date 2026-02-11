@@ -190,9 +190,14 @@ if [ -z "$FILES" ]; then
 fi
 
 echo "Running adversarial code review..."
-git diff origin/main...HEAD | claude --agent adversarial-reviewer -p "Review these changes before push" --no-session-persistence -p
+set +e
+git diff origin/main...HEAD | claude --agent adversarial-reviewer \
+  --no-session-persistence \
+  -p "Review these changes before push"
+REVIEW_EXIT=$?
+set -e
 
-if [ $? -ne 0 ]; then
+if [ $REVIEW_EXIT -ne 0 ]; then
   echo "❌ Adversarial review found critical issues"
   exit 1
 fi

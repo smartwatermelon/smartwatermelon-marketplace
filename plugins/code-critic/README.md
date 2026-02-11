@@ -153,7 +153,7 @@ model: opus
 
 To use a different model, edit `agents/adversarial-reviewer.md` and change the model field.
 
-Note: The agent's Configuration/prompts/IaC domain awareness means it can review its own prompt file — this is intentional and useful for self-improvement workflows.
+Note: The agent's Configuration/prompts/IaC domain covers prompt and config files, which includes its own prompt file — useful for self-review workflows where the agent evaluates changes to its own definition.
 
 ## Contributing
 
