@@ -33,7 +33,7 @@ claude plugin install --all smartwatermelon-marketplace
 
 ### Code Critic
 
-**Status**: Stable v1.2.0
+**Status**: Stable v1.3.0
 **Category**: Quality / Code Review
 
 Skeptical code review agent that assumes code is wrong until proven otherwise. Unlike validation-focused reviewers, Code Critic challenges architectural decisions, identifies failure modes, and prioritizes long-term maintainability.
@@ -155,5 +155,5 @@ Inspired by the philosophy that good tools challenge us to be better developers.
 
 ---
 
-**Latest Version**: 1.2.0
+**Latest Version**: 1.3.0
 **Last Updated**: 2026-02-11

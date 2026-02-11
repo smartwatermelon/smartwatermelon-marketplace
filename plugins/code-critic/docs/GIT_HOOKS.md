@@ -73,7 +73,8 @@ if [ -z "$DIFF" ]; then
   exit 0
 fi
 
-# Run review
+# Run review (temporarily allow non-zero exit to capture result)
+set +e
 echo "$DIFF" | claude --agent adversarial-reviewer \
   --no-session-persistence \
   -p "Review these changes before push. Focus on:
@@ -83,8 +84,8 @@ echo "$DIFF" | claude --agent adversarial-reviewer \
 - Maintenance burden
 
 Provide specific, actionable feedback."
-
 REVIEW_EXIT=$?
+set -e
 
 if [ $REVIEW_EXIT -ne 0 ]; then
   echo "${RED}❌ Code Critic found issues${NC}"
@@ -125,12 +126,15 @@ echo "🔍 Reviewing staged changes..."
 # Get staged diff
 DIFF=$(git diff --cached)
 
-# Run review
+# Run review (temporarily allow non-zero exit to capture result)
+set +e
 echo "$DIFF" | claude --agent adversarial-reviewer \
   --no-session-persistence \
   -p "Quick review of staged changes. Focus on critical issues only."
+REVIEW_EXIT=$?
+set -e
 
-if [ $? -ne 0 ]; then
+if [ $REVIEW_EXIT -ne 0 ]; then
   echo "❌ Review found issues. Fix and retry, or split into smaller commits."
   exit 1
 fi
@@ -179,6 +183,8 @@ fi
 echo "🔒 Security-critical files detected, running adversarial review..."
 echo "$CRITICAL_FILES"
 
+# Run review (temporarily allow non-zero exit to capture result)
+set +e
 git diff origin/main...HEAD | claude --agent adversarial-reviewer \
   --no-session-persistence \
   -p "Review these security-critical changes:
@@ -192,8 +198,10 @@ Focus on:
 - XSS vulnerabilities
 - Race conditions
 - Data exposure"
+REVIEW_EXIT=$?
+set -e
 
-if [ $? -ne 0 ]; then
+if [ $REVIEW_EXIT -ne 0 ]; then
   echo "❌ Security review failed"
   exit 1
 fi
@@ -339,6 +347,13 @@ fi
 
 ### Skipping Review When Appropriate
 
+> **Note**: Application-level skips (`[skip-critic]`, `SKIP_CODE_CRITIC`)
+> are distinct from `--no-verify`. These skip mechanisms are visible in
+> commit history or CI logs, making skipped reviews auditable.
+> `--no-verify` silently bypasses all hooks with no trace. Use
+> application-level skips for docs-only commits or known-safe changes;
+> never use `--no-verify`.
+
 Allow developers to skip when justified:
 
 ```bash
@@ -347,12 +362,14 @@ Allow developers to skip when justified:
 # Check for skip marker in commit message
 if git log -1 --pretty=%B | grep -q '\[skip-critic\]'; then
   echo "⏭️  Skipping Code Critic (commit message contains [skip-critic])"
+  echo "[$(date)] SKIP: Code Critic skipped via [skip-critic]" >> .git/code-critic-skip.log
   exit 0
 fi
 
 # Check for skip marker in environment
 if [ "$SKIP_CODE_CRITIC" = "1" ]; then
   echo "⏭️  Skipping Code Critic (SKIP_CODE_CRITIC=1)"
+  echo "[$(date)] SKIP: Code Critic skipped via SKIP_CODE_CRITIC" >> .git/code-critic-skip.log
   exit 0
 fi
 

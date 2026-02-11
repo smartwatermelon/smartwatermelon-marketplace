@@ -121,29 +121,17 @@ Code Critic addresses concerns in this order:
 **Standard Review:** "Nice use of modern JS!"
 **Code Critic:** "This will be unreadable in 6 months. Break it into explicit steps. Cleverness is not a virtue in production code."
 
-## What's New in v1.1.0
+## Changelog
 
-- **Failure mode checklist**: Systematic review across concurrency, resource management, distributed systems, error handling, security, and data integrity — not just general skepticism
-- **Data model review**: Schema design elevated to second priority in the review hierarchy
-- **Severity calibration**: Clear definitions for Critical (blocks merge), Concern (should fix), and Question (needs justification)
-- **Verdict**: Every review ends with a clear disposition — Block, Revise, or Accept
-- **Follow-up protocol**: Guidance for iterative review, handling pushback, and updating assessments
-- **Domain awareness**: Adjusts review lens for backend, frontend, data pipelines, APIs, and tests
-- **Context and scope**: Explicit instructions to read surrounding code and trace data flow before forming opinions
-- **Honest calibration**: Good code gets recognized with the same rigor as bad code — no manufactured criticism
-- **Activation Criteria removed**: Usage guidance now lives in README and USAGE.md, not in the agent prompt
+See [CHANGELOG.md](CHANGELOG.md) for version history.
 
-## What's New in v1.2.0
+### Latest: v1.3.0
 
-- **Observability checklist**: New failure mode category — can you tell when this is broken in production?
-- **Insufficient Context verdict**: Fourth verdict option for partial reviews where context is missing
-- **Diff-awareness**: Guidance for adapting review depth to diffs vs. full files vs. snippets
-- **Output length calibration**: Concise for git hooks, thorough for interactive review
-- **Confidence signaling**: Distinguishes confirmed findings from pattern-based suspicions
-- **Domain Awareness repositioned**: Now sets the review lens before the hierarchy is applied
-- **Configuration/prompts/IaC domain**: New domain-specific guidance for reviewing config and prompt files
-- **Honest calibration restored**: "Genuinely good code is rare" qualifier reinstated
-- **Documentation fixes**: Examples updated to match defined response format, severity/verdict duplication removed, `--no-verify` references replaced with safe alternatives
+- Resolved "lead with verdict" vs. verdict-at-end ambiguity
+- Merged Review Context Awareness into Context and Scope
+- Fixed pre-commit hook dead code in GIT_HOOKS.md examples
+- Extracted changelogs to CHANGELOG.md
+- Clarified skip-critic vs bypass distinction in GIT_HOOKS.md
 
 ## What Code Critic is NOT
 
@@ -164,6 +152,8 @@ model: opus
 ```
 
 To use a different model, edit `agents/adversarial-reviewer.md` and change the model field.
+
+Note: The agent's Configuration/prompts/IaC domain covers prompt and config files, which includes its own prompt file — useful for self-review workflows where the agent evaluates changes to its own definition.
 
 ## Contributing
 
