@@ -106,14 +106,20 @@ presigned URLs would eliminate.
   reaches your storage layer.
 
 ### Concerns
-- File proxied through API server to S3 adds latency and cost.
-  Clients should upload directly via S3 presigned URLs.
 - No resume capability. A 90%-complete upload that fails means the
   user starts over. Consider the tus protocol for resumable uploads.
 - File metadata stored separately from files in S3. These will
   drift. S3 object tags would keep them co-located.
 - No per-user upload rate limiting. A single user can consume all
   your upload bandwidth.
+
+### Alternative Approaches
+- **Direct-to-S3 presigned URLs**: Instead of proxying uploads
+  through your API server, generate a presigned URL and let the
+  client upload directly to S3. This eliminates server-side
+  bandwidth cost, reduces latency, and removes your API server
+  as a failure point in the upload path. Your API only handles
+  the lightweight presign request and post-upload metadata.
 
 ### Questions
 - Why synchronous upload? This blocks API workers. What's the
