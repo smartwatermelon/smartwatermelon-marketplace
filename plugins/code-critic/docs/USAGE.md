@@ -25,10 +25,11 @@ Claude: Let me review this implementation using the adversarial-reviewer agent
 
 The agent will:
 1. Analyze your code from a skeptical perspective
-2. Challenge architectural decisions
-3. Identify potential failure modes
-4. Question maintenance burden
-5. Provide specific, actionable feedback
+2. Check the data model for invalid-state representation
+3. Challenge architectural decisions
+4. Systematically check for failure modes (concurrency, resource leaks, distributed systems, security, data integrity)
+5. Question maintenance burden
+6. Provide specific, actionable feedback with a clear verdict (Block, Revise, or Accept)
 
 ### Agent Naming
 
@@ -69,7 +70,11 @@ RECOMMENDATIONS:
 2. Implement sliding refresh window instead of hard cutoff
 3. Add circuit breaker for refresh endpoint
 4. Store refresh attempt count to detect compromise
-5. Add integration test for concurrent refresh attempts"
+5. Add integration test for concurrent refresh attempts
+
+VERDICT: Block. The race condition on concurrent refresh and the non-atomic
+token rotation will cause user lockouts in production. Fix those two before
+merging."
 ```
 
 ### Example 2: Reviewing an API Design
@@ -104,7 +109,10 @@ RECOMMENDATIONS:
 3. Add virus scanning (ClamAV or AWS GuardDuty)
 4. Store all metadata as S3 object tags for consistency
 5. Add per-user upload rate limiting
-6. Consider S3 Transfer Acceleration for global users"
+6. Consider S3 Transfer Acceleration for global users
+
+VERDICT: Revise. The direct-to-S3 upload is an architecture change, not a
+tweak — rework the upload path, add virus scanning, and I'd approve."
 ```
 
 ## CLI Usage
@@ -302,12 +310,21 @@ concern?
 
 ## Interpreting Feedback
 
-### Severity Levels (Inferred from Feedback)
+### Severity Calibration
 
-- **Critical**: "This will break" → Must fix
-- **Important**: "This will cause problems" → Should fix
-- **Suggestion**: "Consider..." → Optional improvement
-- **Question**: "Why...?" → Needs justification
+The agent applies these standards consistently:
+
+- **Critical** (blocks merge): The code will break in production under realistic conditions. Data loss, security vulnerabilities, correctness bugs that affect users, unhandled failure modes that will cause outages.
+- **Concern** (should fix, doesn't block): Technical debt that will compound. Missing observability. Coupling that will make the next change painful. Performance issues that don't matter now but will at 10x scale.
+- **Question** (needs justification): Design decisions that seem undermotivated. Trade-offs that weren't explained. Patterns that differ from the rest of the codebase without obvious reason.
+
+### Verdict
+
+Every review ends with a clear disposition:
+
+- **Block**: "Do not merge this. [These issues] must be addressed first."
+- **Revise**: "This needs changes before merging: [specific list]. I'd approve once those are addressed."
+- **Accept**: "This is solid. [Brief explanation of why.] Ship it."
 
 ### When to Push Back
 

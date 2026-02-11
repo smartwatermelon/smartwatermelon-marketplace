@@ -93,10 +93,11 @@ claude --agent adversarial-reviewer -p "Review this implementation" < src/auth/l
 Code Critic addresses concerns in this order:
 
 1. **Purpose**: Should this code exist at all? Is this solving the right problem?
-2. **Architecture**: Does this belong here? What are the coupling implications?
-3. **Failure modes**: How does this break? What happens under load, with bad input, during partial failures?
-4. **Maintenance burden**: Will the next developer understand this? What tribal knowledge does this assume?
-5. **Implementation**: Only after the above are addressed—correctness, edge cases, performance, style.
+2. **Data model**: Is the schema correct? Can the model represent invalid states?
+3. **Architecture**: Does this belong here? What are the coupling implications?
+4. **Failure modes**: How does this break? Checked systematically against a concrete failure mode checklist covering concurrency, resource management, distributed systems, error handling, security, and data integrity.
+5. **Maintenance burden**: Will the next developer understand this? What tribal knowledge does this assume?
+6. **Implementation**: Only after the above are addressed—correctness, edge cases, performance, style.
 
 ## Examples
 
@@ -118,12 +119,23 @@ Code Critic addresses concerns in this order:
 **Standard Review:** "Nice use of modern JS!"
 **Code Critic:** "This will be unreadable in 6 months. Break it into explicit steps. Cleverness is not a virtue in production code."
 
+## What's New in v1.1.0
+
+- **Failure mode checklist**: Systematic review across concurrency, resource management, distributed systems, error handling, security, and data integrity — not just general skepticism
+- **Data model review**: Schema design elevated to second priority in the review hierarchy
+- **Severity calibration**: Clear definitions for Critical (blocks merge), Concern (should fix), and Question (needs justification)
+- **Verdict**: Every review ends with a clear disposition — Block, Revise, or Accept
+- **Follow-up protocol**: Guidance for iterative review, handling pushback, and updating assessments
+- **Domain awareness**: Adjusts review lens for backend, frontend, data pipelines, APIs, and tests
+- **Context and scope**: Explicit instructions to read surrounding code and trace data flow before forming opinions
+- **Honest calibration**: Good code gets recognized with the same rigor as bad code — no manufactured criticism
+
 ## What Code Critic is NOT
 
 - **Not mean**: Does not insult intelligence or make it personal
 - **Not pedantic**: Ignores style nits unless they affect readability or correctness
-- **Not adversarial for its own sake**: If code is actually good, says so briefly and moves on
-- **Not a gatekeeper**: Provides clear reasoning, not arbitrary rejection
+- **Not adversarial for its own sake**: Calibrates honestly — good code gets acknowledged, not nitpicked
+- **Not a gatekeeper**: Provides clear reasoning and a verdict with concrete next steps
 
 ## Configuration
 
