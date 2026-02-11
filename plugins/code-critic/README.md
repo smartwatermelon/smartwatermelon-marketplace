@@ -11,6 +11,7 @@ Code Critic is a skeptical code review agent inspired by senior engineers who've
 Your job is not to validate the developer's approach. Your job is to find what's wrong, what will break, and what will become someone else's problem in 18 months.
 
 **Assumptions:**
+
 - The developer may be solving the wrong problem
 - Requirements may be incomplete or misunderstood
 - "It works" is not the same as "it's correct"
@@ -47,6 +48,7 @@ Use the Task tool with subagent_type="adversarial-review:adversarial-reviewer"
 ```
 
 Example conversation:
+
 ```
 User: I've implemented the user authentication system
 Claude: Let me use the adversarial-review agent to review this implementation
@@ -71,7 +73,7 @@ claude --agent adversarial-reviewer -p "Review this implementation" < src/auth/l
 
 ## When to Use Code Critic
 
-### ✅ Use Code Critic When:
+### ✅ Use Code Critic When
 
 - Implementing security-critical code (auth, payments, data handling)
 - Making architectural decisions
@@ -80,10 +82,10 @@ claude --agent adversarial-reviewer -p "Review this implementation" < src/auth/l
 - You want genuinely critical feedback, not validation
 - Changes affect system boundaries or contracts
 
-### ❌ Use Standard Review When:
+### ❌ Use Standard Review When
 
 - Making small, obvious bug fixes
-- Writing tests
+- Writing tests (unless they encode architectural assumptions)
 - Updating documentation
 - Refactoring with comprehensive test coverage
 - You need quick validation of straightforward changes
@@ -129,6 +131,19 @@ Code Critic addresses concerns in this order:
 - **Domain awareness**: Adjusts review lens for backend, frontend, data pipelines, APIs, and tests
 - **Context and scope**: Explicit instructions to read surrounding code and trace data flow before forming opinions
 - **Honest calibration**: Good code gets recognized with the same rigor as bad code — no manufactured criticism
+- **Activation Criteria removed**: Usage guidance now lives in README and USAGE.md, not in the agent prompt
+
+## What's New in v1.2.0
+
+- **Observability checklist**: New failure mode category — can you tell when this is broken in production?
+- **Insufficient Context verdict**: Fourth verdict option for partial reviews where context is missing
+- **Diff-awareness**: Guidance for adapting review depth to diffs vs. full files vs. snippets
+- **Output length calibration**: Concise for git hooks, thorough for interactive review
+- **Confidence signaling**: Distinguishes confirmed findings from pattern-based suspicions
+- **Domain Awareness repositioned**: Now sets the review lens before the hierarchy is applied
+- **Configuration/prompts/IaC domain**: New domain-specific guidance for reviewing config and prompt files
+- **Honest calibration restored**: "Genuinely good code is rare" qualifier reinstated
+- **Documentation fixes**: Examples updated to match defined response format, severity/verdict duplication removed, `--no-verify` references replaced with safe alternatives
 
 ## What Code Critic is NOT
 
