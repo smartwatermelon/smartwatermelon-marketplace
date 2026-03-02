@@ -111,13 +111,6 @@ Plugins in this marketplace must:
 
 ## Marketplace Philosophy
 
-### Why "SmartWatermelon"?
-
-SmartWatermelon represents the intersection of:
-
-- **Smart**: Intelligent, thoughtful tooling that enhances developer capabilities
-- **Watermelon**: Fresh perspective, cutting through to the core of problems
-
 ### Quality Over Quantity
 
 This marketplace emphasizes quality over quantity. Each plugin is:
