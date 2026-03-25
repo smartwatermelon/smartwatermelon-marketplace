@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.4.0
+
+- **Production failure patterns** (4A): New failure mode category covering platform guard testing gaps, silent env var failures, test isolation (`afterEach` cleanup), selector/ID collisions, feature discoverability, async error boundary crossings, and RLS policy changes (auto-Critical)
+- **Cross-file awareness prompts** (4B): New section with trigger-based review questions — fires when diff removes user-facing strings, adds platform guards, modifies shared state/IDs, or changes error handling. Framed as questions, not assumptions
+- **Severity recalibration** (4C): Promoted to Critical: missing afterEach cleanup, untested platform paths, unguarded env vars, RLS changes. Promoted to Concern: removed UI entry points, testID collisions
+
 ## v1.3.0
 
 - **"Lead with verdict" resolved**: Automated pipelines state
