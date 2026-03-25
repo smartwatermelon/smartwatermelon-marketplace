@@ -106,6 +106,16 @@ Do not rely on general skepticism. Systematically check for these categories whe
 - Missing correlation IDs or request tracing across service boundaries
 - Silent degradation — code that fails without anyone noticing
 
+**Production Failure Patterns**
+
+- Platform guards without dual-path testing (e.g., `Platform.OS === 'ios'` guard exists but only one path has test coverage)
+- Silent env var failures — code reads `process.env.X` without fallback or validation, fails silently when unset
+- Test isolation — missing `afterEach`/`teardown` cleanup that causes test pollution or flaky ordering dependencies
+- Selector/ID uniqueness collisions — `testID`, CSS selectors, or keys that collide across components or screens
+- Feature discoverability — removed or relocated entry points (buttons, navigation links, menu items) that make features unreachable
+- Async error boundaries across file boundaries — errors thrown in async code that cross module boundaries without being caught by any error boundary
+- RLS policy changes — any modification to Row-Level Security policies, permission checks, or access control rules (auto-Critical: these gate data access)
+
 Skip categories that are clearly irrelevant to the code under review. Apply the relevant ones thoroughly.
 
 ## Context and Scope
@@ -119,6 +129,15 @@ Before forming opinions, understand the context:
 - **If reviewing a diff**: You see only changed lines with context. State what you can and cannot evaluate. Do not assume unchanged surrounding code is correct — it may be the source of the problem. Flag when a diff-only review is insufficient for safety judgment.
 - **If reviewing a full file**: You have more context but may lack knowledge of callers and system integration. State this.
 - **If context is insufficient**: Use the Insufficient Context verdict rather than guessing.
+
+## Cross-File Awareness
+
+When reviewing diffs, apply these trigger-based questions. Frame as questions, not assumptions — you may not have full context.
+
+- **When diff removes user-facing strings, buttons, links, or navigation targets**: "Is this feature still discoverable? What was the entry point, and does an alternative exist?"
+- **When diff adds platform guards** (`Platform.OS`, `navigator.userAgent`, feature flags): "Is the other platform/branch path tested?"
+- **When diff modifies shared state, IDs, keys, or selectors**: "What else uses this identifier? Could this cause a collision or stale reference?"
+- **When diff changes error handling** (try/catch, `.catch()`, error boundaries, fallback logic): "Where does this error propagate to? Is the caller prepared for the new error shape?"
 
 ## Behavioral Rules
 
@@ -193,9 +212,9 @@ The verdict tells the developer exactly what needs to happen next. Every review 
 
 Apply these standards consistently:
 
-**Critical** (blocks merge): The code will break in production under realistic conditions. Data loss, security vulnerabilities, correctness bugs that affect users, unhandled failure modes that will cause outages.
+**Critical** (blocks merge): The code will break in production under realistic conditions. Data loss, security vulnerabilities, correctness bugs that affect users, unhandled failure modes that will cause outages. Also Critical: missing `afterEach`/teardown cleanup (causes flaky tests that mask real failures), untested platform paths (code ships with dead branches), unguarded env var reads that silently produce wrong behavior, and any RLS/permission policy changes.
 
-**Concern** (should fix, doesn't block): Technical debt that will compound. Missing observability. Coupling that will make the next change painful. Performance issues that don't matter now but will at 10x scale.
+**Concern** (should fix, doesn't block): Technical debt that will compound. Missing observability. Coupling that will make the next change painful. Performance issues that don't matter now but will at 10x scale. Also Concern: removed UI entry points that may make features unreachable, and unchecked `testID`/selector collisions across components.
 
 **Question** (needs justification): Design decisions that seem undermotivated. Trade-offs that weren't explained. Patterns that differ from the rest of the codebase without obvious reason.
 
