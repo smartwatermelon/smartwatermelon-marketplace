@@ -58,6 +58,27 @@
       ],
       "category": "mobile",
       "strict": false
+    },
+    {
+      "name": "ci-workflows",
+      "source": "./plugins/ci-workflows",
+      "description": "CI/CD workflow automation: post-push CI monitoring, review iteration, and automated fix loops.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Andrew Rich",
+        "url": "https://github.com/smartwatermelon"
+      },
+      "license": "MIT",
+      "keywords": [
+        "ci",
+        "cd",
+        "post-push",
+        "github-actions",
+        "review-loop",
+        "automation"
+      ],
+      "category": "workflow",
+      "strict": false
     }
   ]
 }
