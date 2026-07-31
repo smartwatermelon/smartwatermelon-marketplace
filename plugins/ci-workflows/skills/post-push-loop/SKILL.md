@@ -1,6 +1,6 @@
 ---
 name: post-push-loop
-description: "Use after pushing a PR branch to autonomously monitor CI, fetch remote review findings, generate fixes, and iterate until CI is clean or a hard decision is needed. Invoke as: /post-push-loop [pr-number]"
+description: "Use after pushing a PR to autonomously monitor CI, fetch review findings, and iterate fixes until clean. Invoke as: /post-push-loop [pr-number]"
 ---
 
 # Post-Push Loop
@@ -67,7 +67,7 @@ Timeout: if `CI_STATE` has not resolved after 15 minutes, escalate with reason
 Parse script output using this exact decision table — evaluate in order:
 
 | CI_STATE | FINDING lines present? | Action |
-|---|---|---|
+| --- | --- | --- |
 | `SUCCESS` | No | **Exit: Success** |
 | `SUCCESS` | Yes | Proceed to Phase 3 |
 | `FAILURE` | Either | Proceed to Phase 3 |
