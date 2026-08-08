@@ -63,6 +63,13 @@ Is the Canvas rendering anything?
     │   ├─ Check: Is there a blocking View/component?
     │   └─ Try: Add onPointerMissed to Canvas
     │
+    ├─ "Cannot delete property '__r3f' of undefined"?
+    │   ├─ Check: Using locationX/locationY, not clientX/clientY?
+    │   ├─ Check: Does useMemo return a Three.js object instead of a primitive array?
+    │   ├─ Check: Any module-level `new Vector3()`/`new Quaternion()` constants?
+    │   ├─ Check: Does state management replace object refs instead of mutating?
+    │   └─ See: "Issue: Cannot delete property '__r3f' of undefined" below
+    │
     └─ Performance issues?
         ├─ Check: Are you creating objects every render?
         ├─ Check: How many draw calls?
@@ -220,6 +227,113 @@ function RaycastDebugger() {
     {/* UI overlay */}
   </View>
 </View>
+```
+
+## Issue: "Cannot delete property '__r3f' of undefined"
+
+### What It Looks Like
+
+```
+TypeError: Cannot delete property '__r3f' of undefined
+```
+
+This fires during a re-render or unmount cleanup — not on initial mount. It often shows up mid-interaction (touch, drag, physics update) rather than at a predictable location in your code.
+
+### Why It Happens
+
+R3F attaches internal `__r3f` bookkeeping metadata directly onto the Three.js objects (meshes, geometries, materials, Vector3/Quaternion instances, etc.) you pass as props. R3F's cleanup effect later tries to `delete` that `__r3f` property when the object is replaced or the component unmounts.
+
+If the *reference* to that Three.js object changes or gets orphaned between renders — a new object is created, state replaces it wholesale, or it was never uniquely owned by that component — R3F's cleanup tries to delete `__r3f` off an object it no longer owns (or that was never fully attached), and the property lookup resolves to `undefined`. Hence: "Cannot delete property `__r3f` of undefined."
+
+The fix in every case below is the same principle: keep Three.js object *references* stable across renders, and don't let unrelated bugs (like broken touch coordinates) put components into inconsistent re-render states that trigger this cleanup path.
+
+### Root Cause 1: Touch Coordinate Mismatch
+
+**Problem**: React Native R3F pointer events use `locationX`/`locationY`, not the web-standard `clientX`/`clientY`.
+
+**Symptom**: Touch handlers receive `undefined` coordinates, which breaks raycasting and orbit controls. The resulting broken interaction state can cascade into components re-rendering in ways that confuse R3F's cleanup, surfacing as a `__r3f` error even though the root issue is the touch coordinates.
+
+**Fix**:
+
+```tsx
+// ❌ WRONG - Works on web, undefined on React Native
+const x = e.nativeEvent.clientX;
+
+// ✅ CORRECT - React Native touch coordinates
+const x = (e as unknown as { locationX: number }).locationX;
+const y = (e as unknown as { locationY: number }).locationY;
+```
+
+### Root Cause 2: `useMemo` Returning a Three.js Object
+
+**Problem**: When `useMemo` returns a new Three.js object (Quaternion, Vector3, etc.) on re-render, the old object gets orphaned and R3F's cleanup fails trying to detach it.
+
+**Fix**: Return primitive arrays instead of Three.js objects:
+
+```tsx
+// ❌ WRONG - R3F tracks this Quaternion object
+const { quaternion } = useMemo(() => {
+  const quat = new Quaternion().setFromUnitVectors(yAxis, direction);
+  return { quaternion: quat };  // Three.js object returned
+}, [deps]);
+
+<mesh quaternion={quaternion} />
+
+// ✅ CORRECT - Primitive array, no object tracking
+const { quaternion } = useMemo(() => {
+  const quat = new Quaternion().setFromUnitVectors(yAxis, direction);
+  return { quaternion: [quat.x, quat.y, quat.z, quat.w] as [number, number, number, number] };
+}, [deps]);
+
+<mesh quaternion={quaternion} />
+```
+
+### Root Cause 3: Module-Level Shared Three.js Constants
+
+**Problem**: Module-level Three.js constants (e.g. `const Y_AXIS = new Vector3(0, 1, 0)`) are shared across every instance of a component. If R3F ends up tracking that shared object, multiple component instances interfere with each other's cleanup.
+
+**Symptom**: Intermittent `__r3f` errors, especially with multiple components of the same type on screen.
+
+**Fix**: Create Three.js objects inside functions, not at module level:
+
+```tsx
+// ❌ WRONG - Shared across all component instances
+const Y_AXIS = new ThreeVector3(0, 1, 0);
+
+export function MyComponent() {
+  const rotation = useMemo(() => {
+    // Uses shared Y_AXIS
+  }, []);
+}
+
+// ✅ CORRECT - Created fresh each time
+export function MyComponent() {
+  const rotation = useMemo(() => {
+    const yAxis = new ThreeVector3(0, 1, 0);  // Local to this call
+    // ...
+  }, []);
+}
+```
+
+### Root Cause 4: State Management Replacing Object References
+
+**Problem**: If state management (Zustand, Redux) replaces Vector3/Quaternion object references on every update instead of mutating them, R3F loses track of the objects it was monitoring.
+
+**Symptom**: `__r3f` errors during physics simulation or animation updates.
+
+**Fix**: Mutate existing objects in place rather than replacing them:
+
+```tsx
+// ❌ WRONG - Creates new object, breaks R3F tracking
+node.position = add(node.position, velocity);
+
+// ✅ CORRECT - Mutates existing object
+function setVector3(target: Vector3, source: Vector3) {
+  target.x = source.x;
+  target.y = source.y;
+  target.z = source.z;
+}
+setVector3(node.position, add(node.position, velocity));
 ```
 
 ## Issue: Performance Problems
@@ -386,7 +500,7 @@ function MemoryMonitor() {
 ## Platform Differences
 
 | Behavior | iOS | Android |
-|----------|-----|---------|
+| ---------- | ----- | --------- |
 | WebGL Version | ES 2.0/3.0 | ES 2.0/3.0 |
 | Max Texture Size | Device-dependent | Device-dependent |
 | Touch Latency | ~16ms | ~16ms |
@@ -454,7 +568,7 @@ function DebugPanel() {
 ## Quick Fixes Checklist
 
 | Problem | Quick Fix |
-|---------|-----------|
+| --------- | ----------- |
 | Blank screen | Add dimensions to parent View |
 | Black objects | Add ambient/point light |
 | Touch not working | Disable OrbitControls or add stopPropagation |
@@ -463,3 +577,4 @@ function DebugPanel() {
 | Simulator crash | Test on physical device |
 | Objects invisible | Check camera position and near/far planes |
 | Lines too thin | Use TubeGeometry or Line2 (WebGL 1px limit) |
+| `__r3f` deletion error | Mutate Three.js objects in place; avoid returning new Three.js objects from useMemo/module scope |

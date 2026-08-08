@@ -416,18 +416,19 @@ function DebugEventFlow({ children }) {
 ## Common Mistakes
 
 | Mistake | Fix |
-|---------|-----|
+| --------- | ----- |
 | Not calling `e.stopPropagation()` | Always stop propagation for handled events |
 | Using `onClick` instead of `onPointerDown` | `onPointerDown` is more reliable on mobile |
 | OrbitControls with default settings | Set `enabled={false}` when interacting with objects |
 | Invisible objects not receiving events | They need a material, even if transparent |
 | Lines not selectable | Call `computeLineDistances()` and set threshold |
 | Drag not working outside object bounds | Use `setPointerCapture`/`releasePointerCapture` |
+| Using `clientX`/`clientY` on React Native | Not available on RN — cast `e.nativeEvent` and read `locationX`/`locationY` instead; see `r3f-native-patterns` for the full example |
 
 ## Platform Differences
 
 | Behavior | iOS | Android |
-|----------|-----|---------|
+| ---------- | ----- | --------- |
 | Multi-touch | Works | Works |
 | Pointer capture | Supported | Supported |
 | Event timing | Slightly delayed | Immediate |
