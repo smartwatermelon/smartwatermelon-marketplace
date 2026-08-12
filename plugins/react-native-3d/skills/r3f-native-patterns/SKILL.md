@@ -38,6 +38,32 @@ config.resolver.sourceExts.push('cjs', 'mjs');
 module.exports = config;
 ```
 
+## Avoid Module-Level Three.js Objects
+
+**Warning**: Don't declare Three.js objects (Vector3, Quaternion, etc.) as module-level constants. R3F attaches internal `__r3f` tracking metadata to Three.js objects it manages; a shared module-level instance can end up tracked by multiple component instances at once, causing cross-instance interference and `Cannot delete property '__r3f' of undefined` errors during cleanup.
+
+```tsx
+// ❌ WRONG - Shared across all component instances
+const Y_AXIS = new THREE.Vector3(0, 1, 0);
+
+export function MyComponent() {
+  const rotation = useMemo(() => {
+    // Uses shared Y_AXIS - can cause __r3f tracking conflicts
+    return quaternionFromAxis(Y_AXIS);
+  }, []);
+}
+
+// ✅ CORRECT - Created fresh inside the function
+export function MyComponent() {
+  const rotation = useMemo(() => {
+    const yAxis = new THREE.Vector3(0, 1, 0);  // Local to this call
+    return quaternionFromAxis(yAxis);
+  }, []);
+}
+```
+
+See `debugging-3d-mobile` for the full `__r3f` deletion error writeup.
+
 ## Basic Canvas Setup
 
 ```tsx
@@ -175,6 +201,21 @@ useFrame((state) => {
   applyEffects();
 }, 1);
 ```
+
+## React Native Touch Coordinates
+
+**Callout**: When reading raw touch data off `nativeEvent` (e.g. inside `useThree`-driven pointer handling or custom gesture code), React Native uses `locationX`/`locationY` — not the web-standard `clientX`/`clientY`. Reading the web property silently yields `undefined` on device, which breaks raycasting and orbit controls.
+
+```tsx
+// ❌ WRONG - Works on web, undefined on React Native
+const x = e.nativeEvent.clientX;
+
+// ✅ CORRECT - React Native touch coordinates
+const x = (e as unknown as { locationX: number }).locationX;
+const y = (e as unknown as { locationY: number }).locationY;
+```
+
+See `touch-gesture-3d` for the full touch/gesture handling guide.
 
 ## Accessing Three.js State: useThree
 
@@ -360,7 +401,7 @@ function StandardLighting() {
 ### Light Types
 
 | Light | Use Case | Performance |
-|-------|----------|-------------|
+| ------- | ---------- | ------------- |
 | `ambientLight` | Base fill, no shadows | Cheapest |
 | `directionalLight` | Sun, parallel rays | Medium |
 | `pointLight` | Bulbs, omni-directional | Medium |
@@ -500,6 +541,30 @@ function OptimizedMesh({ color }) {
   return <mesh geometry={geometry} material={material} />;
 }
 ```
+
+### Primitive Arrays vs Three.js Objects in useMemo
+
+**Warning**: If a `useMemo` returns a Three.js object (Quaternion, Vector3, etc.) that gets passed as a prop, R3F attaches `__r3f` tracking metadata to it. A new object created on re-render orphans the old one, and R3F's cleanup effect can throw `Cannot delete property '__r3f' of undefined` trying to detach it. Return primitive arrays instead — they carry no object identity for R3F to track.
+
+```tsx
+// ❌ WRONG - R3F tracks this Quaternion object; new instance each recompute
+const { quaternion } = useMemo(() => {
+  const quat = new THREE.Quaternion().setFromUnitVectors(yAxis, direction);
+  return { quaternion: quat };  // Three.js object returned
+}, [deps]);
+
+<mesh quaternion={quaternion} />
+
+// ✅ CORRECT - Primitive array, no object tracking
+const { quaternion } = useMemo(() => {
+  const quat = new THREE.Quaternion().setFromUnitVectors(yAxis, direction);
+  return { quaternion: [quat.x, quat.y, quat.z, quat.w] as [number, number, number, number] };
+}, [deps]);
+
+<mesh quaternion={quaternion} />
+```
+
+See `debugging-3d-mobile` for the full `__r3f` deletion error writeup, including the state-management (Zustand/Redux) variant of this same problem.
 
 ### Conditional Rendering
 
