@@ -34,6 +34,7 @@ Improving guides, examples, or clarity.
 ### Step 1: Validate the Concept
 
 Before implementing, open a GitHub Discussion to:
+
 - Describe the plugin's purpose
 - Explain how it aligns with marketplace philosophy
 - Discuss the problem it solves
@@ -86,6 +87,7 @@ Create `.claude-plugin/plugin.json`:
 #### README.md
 
 Must include:
+
 - **What it does**: Clear problem statement
 - **When to use it**: Specific use cases
 - **When NOT to use it**: Clear boundaries
@@ -96,6 +98,7 @@ Must include:
 #### docs/USAGE.md
 
 Must include:
+
 - Detailed usage instructions
 - Real-world examples (not toy examples)
 - Integration with other tools
@@ -105,6 +108,7 @@ Must include:
 #### docs/EXAMPLES.md
 
 Must include:
+
 - At least 3 real-world scenarios
 - Expected output for each example
 - Explanation of why the example matters
@@ -148,15 +152,18 @@ Before submitting, verify:
 
 4. Update marketplace README.md with plugin information
 5. Test locally:
-```bash
-claude plugin marketplace add ~/Developer/smartwatermelon-marketplace
-claude plugin install your-plugin-name@smartwatermelon-marketplace
-```
+
+   ```bash
+   claude plugin marketplace add ~/Developer/smartwatermelon-marketplace
+   claude plugin install your-plugin-name@smartwatermelon-marketplace
+   ```
+
 6. Submit pull request
 
 ### Step 7: Pull Request
 
 Your PR should include:
+
 - Plugin code in `plugins/your-plugin-name/`
 - Updated `.claude-plugin/marketplace.json`
 - Updated `README.md` with plugin listing
@@ -213,7 +220,7 @@ All contributions will be reviewed for:
 - **Questions**: Open a GitHub Discussion
 - **Issues**: Open a GitHub Issue
 - **Ideas**: Open a GitHub Discussion with "Idea" label
-- **Urgent**: Email andrew.rich@gmail.com
+- **Urgent**: Email <andrew.rich@gmail.com>
 
 ## Testing Your Plugin
 
@@ -236,11 +243,13 @@ git diff | claude --agent your-agent -p "Review changes"
 ## Versioning
 
 Plugins follow semantic versioning:
+
 - **MAJOR**: Breaking changes
 - **MINOR**: New features (backward compatible)
 - **PATCH**: Bug fixes
 
 Marketplace versions:
+
 - Updated when infrastructure changes
 - Plugin version changes don't require marketplace version bump
 
@@ -251,13 +260,14 @@ By contributing, you agree that your contributions will be licensed under the MI
 ## Recognition
 
 All contributors will be listed in:
+
 - Plugin README (for plugin-specific contributions)
 - Marketplace README (for significant contributions)
 - CONTRIBUTORS.md file
 
 ## Questions?
 
-Feel free to open a Discussion or reach out at andrew.rich@gmail.com
+Feel free to open a Discussion or reach out at <andrew.rich@gmail.com>
 
 ---
 
