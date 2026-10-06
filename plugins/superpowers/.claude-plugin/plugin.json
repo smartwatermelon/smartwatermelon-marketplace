@@ -1,0 +1,20 @@
+{
+  "name": "superpowers",
+  "description": "Hook-less vendored subset of obra/superpowers: brainstorming, planning, subagent-driven development, debugging, TDD, code review, and verification skills. No SessionStart context injection.",
+  "version": "6.4.2-swm.1",
+  "author": {
+    "name": "Jesse Vincent",
+    "email": "jesse@fsck.com"
+  },
+  "homepage": "https://github.com/smartwatermelon/smartwatermelon-marketplace",
+  "repository": "https://github.com/smartwatermelon/smartwatermelon-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "tdd",
+    "debugging",
+    "planning",
+    "code-review",
+    "workflows"
+  ]
+}

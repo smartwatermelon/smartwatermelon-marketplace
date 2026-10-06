@@ -1,0 +1,4 @@
+# Vendored upstream content (obra/superpowers): its comments are not ours to
+# shorten, and it stays byte-identical to upstream. See
+# plugins/superpowers/README.md.
+plugins/superpowers/skills/** length-caps=off
