@@ -1,0 +1,23 @@
+// Repo-local markdownlint-cli2 config. The standards check uses this file in
+// place of the canonical github-workflows standards/markdownlint.json (it does
+// not merge), so "config" restates the canonical rules unchanged.
+//
+// "ignores" exempts the vendored superpowers skills: they are upstream
+// obra/superpowers content kept byte-identical so the upstream sync stays a
+// plain copy. Reformatting them would turn every sync into a reformat diff.
+{
+  "config": {
+    "default": true,
+    "MD013": false,
+    "MD024": {
+      "siblings_only": true
+    },
+    "MD029": false,
+    "MD033": false,
+    "MD036": false,
+    "MD040": false,
+    "MD046": false,
+    "MD060": false
+  },
+  "ignores": ["plugins/superpowers/skills/**"]
+}
