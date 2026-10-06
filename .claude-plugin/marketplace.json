@@ -79,6 +79,28 @@
       ],
       "category": "workflow",
       "strict": false
+    },
+    {
+      "name": "superpowers",
+      "source": "./plugins/superpowers",
+      "description": "Hook-less vendored subset of obra/superpowers (MIT, Jesse Vincent) at 8ca22db: brainstorming, writing-plans, subagent-driven-development, systematic-debugging, and the skills they reference. No SessionStart context injection.",
+      "version": "6.4.2-swm.1",
+      "author": {
+        "name": "Jesse Vincent",
+        "email": "jesse@fsck.com"
+      },
+      "homepage": "https://github.com/obra/superpowers",
+      "license": "MIT",
+      "keywords": [
+        "skills",
+        "tdd",
+        "debugging",
+        "planning",
+        "code-review",
+        "workflows"
+      ],
+      "category": "workflow",
+      "strict": false
     }
   ]
 }
