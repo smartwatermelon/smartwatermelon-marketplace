@@ -17,6 +17,13 @@ requires a human decision.
 
 If `pr-number` is omitted, auto-detect from `gh pr view --json number -q .number`.
 
+Every call to `post-push-status.sh` uses the `OWNER/REPO#N` form (for example
+`smartwatermelon/claude-config#716`), never a bare number. PR numbers collide across
+repos, so a bare number makes the script guess the repo from the current directory.
+Get `OWNER/REPO` once, before the loop, from the checkout:
+`gh repo view --json nameWithOwner -q .nameWithOwner`. Or take it from the PR URL
+(`https://github.com/OWNER/REPO/pull/N`). Call it `<PR_REF>` below.
+
 ---
 
 ## Dependencies
@@ -36,7 +43,7 @@ hook with `POSTPUSH_LOOP` bypass support.
 
 1. Verify `~/.claude/scripts/post-push-status.sh` exists and is executable
 2. Confirm current branch: `git branch --show-current` — must NOT be `main`
-3. Confirm PR number: `gh pr view --json number -q .number`
+3. Confirm PR number: `gh pr view --json number -q .number`, and build `<PR_REF>` as `OWNER/REPO#N`
 4. Confirm `POSTPUSH_LOOP` will be set for all git push calls in this session
 
 ### The Loop
@@ -50,12 +57,27 @@ Repeat until **Exit: Success** or **Exit: Escalate**:
 Poll every 30 seconds:
 
 ```bash
-bash ~/.claude/scripts/post-push-status.sh <PR_NUMBER>
+bash ~/.claude/scripts/post-push-status.sh <PR_REF>
 ```
+
+Check the exit code and the output before you read `CI_STATE`. These two cases are
+terminal. Stop polling at once. Do not wait for the timeout.
+
+- **Exit code 2, or a `PR_STATE=MERGED` / `PR_STATE=CLOSED` line:** the PR is no longer
+  open. Both cases also print `CI_STATE=UNKNOWN`; ignore it. Report the `PR_STATE=` line
+  as it is. `MERGED` means the work is done: report it and stop. There is no CI
+  verdict to check. `CLOSED` means someone closed the PR: **Exit: Escalate**.
+- **Exit code 3, or a `WARNING: HEAD_MISMATCH` line:** the PR head is not your local
+  `HEAD`. The likely cause is local commits that are not pushed yet, or the wrong PR.
+  Do not wait: waiting cannot fix it. Push (`POSTPUSH_LOOP=1 git push`), or re-check
+  that `<PR_REF>` names the PR for this branch, then return to Phase 1 for one fresh
+  poll. If the mismatch persists, **Exit: Escalate** with the `WARNING` line. Because
+  `<PR_REF>` names the repo, the script prints the warning and exits 0 (it keeps
+  going, not exit 3). Treat the `WARNING: HEAD_MISMATCH` line as terminal anyway.
 
 Continue polling while `CI_STATE=PENDING`, `CI_STATE=EXPECTED`, or `CI_STATE=UNKNOWN`.
 
-`CI_STATE=UNKNOWN` indicates a transient error (network failure or no CI checks registered yet) — treat it as pending and continue polling. It counts against the 15-minute timeout.
+`CI_STATE=UNKNOWN` with exit code 0 and no `PR_STATE=` or `HEAD_MISMATCH` line indicates a transient error (network failure or no CI checks registered yet) — treat it as pending and continue polling. It counts against the 15-minute timeout. `CI_STATE=UNKNOWN` with exit code 2 or 3 is NOT transient (see above).
 
 Timeout: if `CI_STATE` has not resolved after 15 minutes, escalate with reason
 "CI did not complete within timeout — check for stuck jobs."
@@ -66,13 +88,15 @@ Timeout: if `CI_STATE` has not resolved after 15 minutes, escalate with reason
 
 Parse script output using this exact decision table — evaluate in order:
 
-| CI_STATE | FINDING lines present? | Action |
-| --- | --- | --- |
-| `SUCCESS` | No | **Exit: Success** |
-| `SUCCESS` | Yes | Proceed to Phase 3 |
-| `FAILURE` | Either | Proceed to Phase 3 |
-| `ERROR` | Either | Proceed to Phase 3 |
-| `UNKNOWN` | Either | Return to Phase 1 (transient — treat as pending) |
+| Exit code / line | CI_STATE | FINDING lines present? | Action |
+| --- | --- | --- | --- |
+| `2` or `PR_STATE=MERGED` / `CLOSED` | `UNKNOWN` | Ignore | Stop. Report the `PR_STATE=` line (merged = done, closed = **Exit: Escalate**) |
+| `3` or `WARNING: HEAD_MISMATCH` | `UNKNOWN` | Ignore | Stop polling. Push or re-check the PR, then one fresh poll; if it persists, **Exit: Escalate** |
+| `0` | `SUCCESS` | No | **Exit: Success** |
+| `0` | `SUCCESS` | Yes | Proceed to Phase 3 |
+| `0` | `FAILURE` | Either | Proceed to Phase 3 |
+| `0` | `ERROR` | Either | Proceed to Phase 3 |
+| `0` | `UNKNOWN` | Either | Return to Phase 1 (transient — treat as pending) |
 
 `CI_STATE=SUCCESS` alone is NOT sufficient to exit — zero `FINDING` lines are also required.
 
