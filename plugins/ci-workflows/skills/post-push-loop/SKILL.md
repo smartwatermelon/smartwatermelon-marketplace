@@ -70,10 +70,10 @@ terminal. Stop polling at once. Do not wait for the timeout.
 - **Exit code 3, or a `WARNING: HEAD_MISMATCH` line:** the PR head is not your local
   `HEAD`. The likely cause is local commits that are not pushed yet, or the wrong PR.
   Do not wait: waiting cannot fix it. Push (`POSTPUSH_LOOP=1 git push`), or re-check
-  that `<PR_REF>` names the PR for this branch, then restart from Phase 1. If neither
-  fixes it, **Exit: Escalate** with the `WARNING` line. Because `<PR_REF>` names the
-  repo, the script prints the warning but may exit 0 and keep going. Treat the
-  `WARNING: HEAD_MISMATCH` line as terminal anyway.
+  that `<PR_REF>` names the PR for this branch, then return to Phase 1 for one fresh
+  poll. If the mismatch persists, **Exit: Escalate** with the `WARNING` line. Because
+  `<PR_REF>` names the repo, the script prints the warning and exits 0 (it keeps
+  going, not exit 3). Treat the `WARNING: HEAD_MISMATCH` line as terminal anyway.
 
 Continue polling while `CI_STATE=PENDING`, `CI_STATE=EXPECTED`, or `CI_STATE=UNKNOWN`.
 
@@ -91,7 +91,7 @@ Parse script output using this exact decision table — evaluate in order:
 | Exit code / line | CI_STATE | FINDING lines present? | Action |
 | --- | --- | --- | --- |
 | `2` or `PR_STATE=MERGED` / `CLOSED` | `UNKNOWN` | Ignore | Stop. Report the `PR_STATE=` line (merged = done, closed = **Exit: Escalate**) |
-| `3` or `WARNING: HEAD_MISMATCH` | `UNKNOWN` | Ignore | Stop. Push or re-check the PR; else **Exit: Escalate** |
+| `3` or `WARNING: HEAD_MISMATCH` | `UNKNOWN` | Ignore | Stop polling. Push or re-check the PR, then one fresh poll; if it persists, **Exit: Escalate** |
 | `0` | `SUCCESS` | No | **Exit: Success** |
 | `0` | `SUCCESS` | Yes | Proceed to Phase 3 |
 | `0` | `FAILURE` | Either | Proceed to Phase 3 |
