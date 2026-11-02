@@ -101,6 +101,21 @@
       ],
       "category": "workflow",
       "strict": false
+    },
+    {
+      "name": "comprehensive-review",
+      "source": "./plugins/comprehensive-review",
+      "description": "Vendored from wshobson/agents (MIT, Seth Hobson) at c4b82b0: multi-perspective code review with code-reviewer, architect-review, and security-auditor agents. Its code-reviewer is the default commit-time reviewer.",
+      "version": "1.3.1-swm.1",
+      "author": {
+        "name": "Seth Hobson",
+        "email": "seth@major7apps.com"
+      },
+      "homepage": "https://github.com/wshobson/agents",
+      "license": "MIT",
+      "keywords": ["code-review", "architecture", "security", "quality"],
+      "category": "quality",
+      "strict": false
     }
   ]
 }

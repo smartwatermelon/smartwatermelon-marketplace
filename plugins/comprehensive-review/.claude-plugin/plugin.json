@@ -1,0 +1,13 @@
+{
+  "name": "comprehensive-review",
+  "version": "1.3.1-swm.1",
+  "description": "Vendored from wshobson/agents (MIT, Seth Hobson) at c4b82b0: multi-perspective code review with code-reviewer, architect-review, and security-auditor agents.",
+  "author": {
+    "name": "Seth Hobson",
+    "email": "seth@major7apps.com"
+  },
+  "homepage": "https://github.com/smartwatermelon/smartwatermelon-marketplace",
+  "repository": "https://github.com/smartwatermelon/smartwatermelon-marketplace",
+  "license": "MIT",
+  "keywords": ["code-review", "architecture", "security", "quality"]
+}
