@@ -2,8 +2,9 @@
 // place of the canonical github-workflows standards/markdownlint.json (it does
 // not merge), so "config" restates the canonical rules unchanged.
 //
-// "ignores" exempts the vendored superpowers skills: they are upstream
-// obra/superpowers content kept byte-identical so the upstream sync stays a
+// "ignores" exempts vendored upstream content: the superpowers skills
+// (obra/superpowers) and the comprehensive-review agents and commands
+// (wshobson/agents). Both are kept byte-identical so an upstream sync stays a
 // plain copy. Reformatting them would turn every sync into a reformat diff.
 {
   "config": {
@@ -19,5 +20,9 @@
     "MD046": false,
     "MD060": false
   },
-  "ignores": ["plugins/superpowers/skills/**"]
+  "ignores": [
+    "plugins/superpowers/skills/**",
+    "plugins/comprehensive-review/agents/**",
+    "plugins/comprehensive-review/commands/**"
+  ]
 }

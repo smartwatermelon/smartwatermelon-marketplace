@@ -146,6 +146,17 @@ Created and maintained by Andrew Rich ([@smartwatermelon](https://github.com/sma
 
 Inspired by the philosophy that good tools challenge us to be better developers.
 
+### Vendored plugins
+
+Two plugins are copies of other authors' MIT-licensed work. Each keeps its
+upstream `LICENSE`, and its `README.md` records the source commit and every
+local change.
+
+- **superpowers**: from [obra/superpowers](https://github.com/obra/superpowers)
+  by Jesse Vincent. See [plugins/superpowers/README.md](plugins/superpowers/README.md).
+- **comprehensive-review**: from [wshobson/agents](https://github.com/wshobson/agents)
+  by Seth Hobson. See [plugins/comprehensive-review/README.md](plugins/comprehensive-review/README.md).
+
 ---
 
 **Latest Version**: 1.3.0

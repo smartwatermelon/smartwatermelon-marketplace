@@ -3,6 +3,12 @@
 **Status**: Proposed — not scheduled. This document is a plan for future work, not
 an in-flight migration. No repos have been touched as part of writing this.
 
+**Update 2026-11-02**: `claude-code-workflows-agents` no longer tracks upstream
+(its last upstream commit is `wshobson/agents@c4b82b0`, 2026-07-18). Its only
+used plugin, `comprehensive-review`, is now vendored at
+`plugins/comprehensive-review/`, and the repo is to be archived. The rows and
+sections below that keep it as a separate upstream-tracking fork are superseded.
+
 ## Why
 
 Claude Code plugin/skill/marketplace content is currently spread across 7
